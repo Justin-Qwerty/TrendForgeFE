@@ -12,14 +12,18 @@ const readyImageText = document.getElementById("readyImageText")
 const generateImageButton = document.getElementById("generateImagebutton")
 const videoTrigger = document.getElementById("videoTrigger")
 const imageTrigger = document.getElementById("imageTrigger")
+const chunkTrigger = document.getElementById("chunkTrigger")
 const imageForm = document.getElementById("subjectImageForm")
 const videoForm = document.getElementById("subjectForm")
+const chunkGeneration = document.getElementById("chunkGeneration")
 const imagePreview = document.getElementById("imagePreview")
 const viewButton = document.getElementById("viewButton")
 const downloadImageButton = document.getElementById("downloadImageButton")
 const imagePreviewContainer = document.getElementById("imagePreviewContainer")
 const streamImageContainer = document.getElementById("streamImageContainer")
 const streamVideoContainer = document.getElementById("streamVideoContainer")
+const uploadButton = document.getElementById("uploadButton")
+const downloadChunkButton = document.getElementById("downloadChunkButton")
 let title = "";
 
 
@@ -43,7 +47,7 @@ document.getElementById("subjectForm").addEventListener("submit", async (event) 
     imageTrigger.classList.add("cursor-not-allowed")
 
     try{
-        const response = await fetch("http://87.106.135.198:5151/generateVideo", {
+        const response = await fetch("http://87.106.135.198:5152/generateVideo", {
             method: "POST",
             body: formdata
         })
@@ -94,7 +98,7 @@ document.getElementById("subjectImageForm").addEventListener("submit", async (ev
     imageTrigger.classList.add("cursor-not-allowed")
 
     try{
-        const response = await fetch("http://87.106.135.198:5151/generateImage", {
+        const response = await fetch("http://87.106.135.198:5152/generateImage", {
             // 87.106.135.198:5151
             method: "POST",
             body: formdata
@@ -126,10 +130,64 @@ document.getElementById("subjectImageForm").addEventListener("submit", async (ev
 
 })
 
+//THIS IS FOR CHUNKING VIDEO
+document.getElementById("chunkGeneration").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const videoInput = document.getElementById("longVideoUpload");
+    if (videoInput.files.length === 0) {
+        alert("Please upload a video file.");
+        return;
+    }
+
+    const videoFile = videoInput.files[0];
+    const isAICutEnabled = document.getElementById("smartCut").checked;
+    const processforReels = document.getElementById("processforReels").checked;
+
+    let formData = new FormData();
+    formData.append("video", videoFile);
+    formData.append("ai_cut", isAICutEnabled);
+    formData.append("forReels", processforReels);
+    
+    uploadButton.disabled = true
+    uploadButton.textContent = "Chunking Video please wait..."
+    uploadButton.classList.add("opacity-50", "cursor-not-allowed")
+    videoTrigger.disabled = true
+    videoTrigger.classList.add("cursor-not-allowed")
+    imageTrigger.disabled = true
+    imageTrigger.classList.add("cursor-not-allowed")
+    chunkTrigger.disabled = true
+    chunkTrigger.classList.add("cursor-not-allowed")
+
+    fetch("http://87.106.135.198:5152/chunkVideo", {
+        // http://87.106.135.198:5152
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+        return response.json();
+        
+    })
+    .then(data => {
+        console.log(data);
+        restartbutton.classList.remove("hidden")
+        uploadButton.classList.add("hidden")
+        downloadChunkButton.classList.remove("hidden")
+        
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+
+})
+
+
 // THIS IS FOR STREAMING VIDEO
 function loadVideo(){
 
-    videovar.src= "http://87.106.135.198:5151/video";
+    videovar.src= "http://87.106.135.198:5152/video";
     videovar.load();
     videovar.play();
     videovar.style.display= "block";
@@ -139,7 +197,7 @@ function loadVideo(){
 
 // THIS IS FOR DOWNLOADING VIDEO
 async function downloadVideo(){
-    const response = await fetch("http://87.106.135.198:5151/downloadVideo", {
+    const response = await fetch("http://87.106.135.198:5152/downloadVideo", {
         method: "POST"
     })
 
@@ -168,7 +226,7 @@ function exitVideo(){
 
 // THIS IS FOR VIEWING IMAGE
 function viewImage(){
-    fetch(`http://87.106.135.198:5151/streamImage`)
+    fetch(`http://87.106.135.198:5152/streamImage`)
     .then(response => response.blob())
     .then(imageBlob => {
         const imgUrl = URL.createObjectURL(imageBlob);
@@ -181,7 +239,7 @@ function viewImage(){
 
 //THIS IS FOR DOWNLOADING IMAGE
 async function downloadImage(){
-    const response = await fetch("http://87.106.135.198:5151/test", {
+    const response = await fetch("http://87.106.135.198:5152/downloadImage", {
         method: "POST"
     })
 
@@ -200,11 +258,14 @@ async function downloadImage(){
     window.URL.revokeObjectURL(url);
 }
 
-// THIS IS FOR CHOOSING IMAGE AND VIDEO
+
+
+// THIS IS FOR CHOOSING IMAGE , VIDEO AND CHUNK
 
 function generateVideo(){
     videoForm.classList.remove("hidden")
     imageForm.classList.add("hidden")
+    chunkGeneration.classList.add("hidden")
     videoTrigger.disabled = true
     videoTrigger.classList.add("cursor-not-allowed")
     imageTrigger.disabled = false
@@ -219,6 +280,12 @@ function generateVideo(){
     imageTrigger.classList.remove("border-red-600")
     streamImageContainer.classList.add("hidden")
     streamVideoContainer.classList.remove("hidden")
+    chunkTrigger.disabled = false
+    chunkTrigger.classList.remove("cursor-not-allowed")
+    chunkTrigger.classList.add("bg-slate-900")
+    chunkTrigger.classList.add("hover:bg-slate-800")
+    chunkTrigger.classList.remove("bg-slate-600")
+    chunkTrigger.classList.remove("border-red-600")
     
     
 }
@@ -226,6 +293,7 @@ function generateVideo(){
 function generateImage(){
     imageForm.classList.remove("hidden")
     videoForm.classList.add("hidden")
+    chunkGeneration.classList.add("hidden")
     videoTrigger.disabled = false
     videoTrigger.classList.remove("cursor-not-allowed")
     imageTrigger.disabled = true
@@ -240,6 +308,40 @@ function generateImage(){
     videoTrigger.classList.remove("border-red-600")
     streamImageContainer.classList.remove("hidden")
     streamVideoContainer.classList.add("hidden")
+    chunkTrigger.disabled = false
+    chunkTrigger.classList.remove("cursor-not-allowed")
+    chunkTrigger.classList.add("bg-slate-900")
+    chunkTrigger.classList.add("hover:bg-slate-800")
+    chunkTrigger.classList.remove("bg-slate-600")
+    chunkTrigger.classList.remove("border-red-600")
+
+    
+}
+
+function generateChunkVideos(){
+    imageForm.classList.add("hidden")
+    videoForm.classList.add("hidden")
+    chunkGeneration.classList.remove("hidden")
+    videoTrigger.disabled = false
+    videoTrigger.classList.remove("cursor-not-allowed")
+    imageTrigger.disabled = false
+    imageTrigger.classList.remove("cursor-not-allowed")
+    imageTrigger.classList.add("bg-slate-900")
+    imageTrigger.classList.add("hover:bg-slate-800")
+    imageTrigger.classList.remove("bg-slate-600")
+    videoTrigger.classList.add("bg-slate-900")
+    videoTrigger.classList.add("hover:bg-slate-800")
+    videoTrigger.classList.remove("bg-slate-600")
+    imageTrigger.classList.remove("border-red-600")
+    videoTrigger.classList.remove("border-red-600")
+    streamImageContainer.classList.add("hidden")
+    streamVideoContainer.classList.add("hidden")
+    chunkTrigger.disabled = true
+    chunkTrigger.classList.add("cursor-not-allowed")
+    chunkTrigger.classList.remove("bg-slate-900")
+    chunkTrigger.classList.remove("hover:bg-slate-800")
+    chunkTrigger.classList.add("bg-slate-600")
+    chunkTrigger.classList.add("border-red-600")
 
     
 }

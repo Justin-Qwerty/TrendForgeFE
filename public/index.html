@@ -20,6 +20,9 @@
                 " disabled>Generate Video</button>
                 <button onclick=generateImage() id="imageTrigger" class="my-5 border-2 self-center w-40 py-5 rounded-lg bg-slate-900 text-white text-md font-[orbitron] font-bold hover:bg-slate-800
                 ">Generate Image</button>
+                <button onclick=generateChunkVideos() id="chunkTrigger" class="my-5  border-2 self-center  w-40 py-5 mx-3 rounded-lg bg-slate-900 text-white text-md font-[orbitron] font-bold hover:bg-slate-800
+                ">Chunk Video</button>
+                
             </div>
             <!-- THIS IS FOR THE FORM FOR VIDEO GENERATION -->
             <form class="flex flex-row justify-center" id="subjectForm">
@@ -40,6 +43,23 @@
                     <button class="my-5 border-2 self-center w-56 py-5 rounded-lg bg-slate-700 text-white text-xl font-bold hover:bg-slate-600
                     " type="submit" id="generateImagebutton">Generate Image</button>
                 </div>
+            </form>
+            <!-- THIS IS FOR THE CHUNK GENERATION -->
+          
+            <form id="chunkGeneration" class="hidden">
+                <label for="longVideoUpload" class="block text-lg font-semibold my-5">Upload Video</label>
+                <div class="flex flex-col">
+                    <input type="file" id="longVideoUpload" accept="video/*"required>
+                    <div class="flex flex-row my-3 pt-3 border-t-2 border-black">
+                    <input type="checkbox" id="smartCut" class="mx-4">
+                    <label for="smartCut" id="checkboxAICut" class="font-semibold"> AI cut</label>
+                    </div>
+                    <div class="flex flex-row mb-3">
+                        <input type="checkbox" id="processforReels" class="mx-4">
+                        <label for="processforReels" id="checkboxforReels" class="font-semibold"> Process For Reels(make it vertical Video)</label>
+                    </div>
+                </div>
+                <button type="submit" class="my-5 border-2 self-center w-56 py-5 rounded-lg bg-slate-700 text-white text-xl font-bold hover:bg-slate-600" id="uploadButton">Upload</button>
             </form>
             <a href="javascript:location.reload()" id="restartbutton" class="w-64 self-center hidden"><button class="my-5 border-2 self-center w-64 py-5 rounded-lg bg-slate-700 text-white text-lg font-bold  hover:bg-slate-600
                 ">Generate Another Content</button></a>
@@ -68,6 +88,9 @@
                         <button id="viewButton" onclick=viewImage() class="border-2 p-4 hover:bg-slate-200 mr-2 cursor-not-allowed rounded-lg my-4 font-semibold font-serif text-xl border-black" disabled>View Image</button>
                         <button id="downloadImageButton" onclick=downloadImage() class="border-2 p-4 hover:bg-slate-200 ml-2 cursor-not-allowed rounded-lg my-4 font-semibold font-serif text-xl border-black" disabled>Download Image</button>
                     </div>
+            </div>
+            <div>
+                <a href="http://87.106.135.198:5152/downloadFolder"><button id="downloadChunkButton" class="border-2 p-4 hover:bg-slate-200 ml-2 hidden rounded-lg my-4 font-semibold font-serif text-xl border-black">Download Chunk</button></a>
             </div>
         </div>
         
